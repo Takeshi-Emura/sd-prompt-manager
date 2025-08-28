@@ -1,4 +1,18 @@
-<!DOCTYPE html>
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .prompt-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .prompt-item-actions {
+                justify-content: flex-start;
+            }
+        }<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -693,9 +707,12 @@
                 return;
             }
             
-            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const colors = ['#f56565', '#48bb78', '#ed8936', '#9f7aea', '#38b2ac', '#805ad5', '#d69e2e'];
+            // 日本語対応のID生成 - タイムスタンプを使用してユニークなIDを作成
+            const id = 'category_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            const colors = ['#f56565', '#48bb78', '#ed8936', '#9f7aea', '#38b2ac', '#805ad5', '#d69e2e', '#f093fb', '#4facfe', '#43e97b'];
             const color = colors[AppState.categories.length % colors.length];
+            
+            console.log('新しいカテゴリー:', { id, name, color });
             
             AppState.categories.push({ id, name, color });
             saveData();
