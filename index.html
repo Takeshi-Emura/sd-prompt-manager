@@ -1,0 +1,1063 @@
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .prompt-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .prompt-item-actions {
+                justify-content: flex-start;
+            }
+        }<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SD Prompt Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        .form-section {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-section h3 {
+            margin-bottom: 15px;
+            color: #4a5568;
+            font-size: 16px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .input-row input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-row select {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: #f7fafc;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .category-section {
+            margin-bottom: 20px;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f7fafc;
+            border-radius: 6px;
+            border-left: 4px solid;
+            margin-bottom: 10px;
+        }
+
+        .category-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #4a5568;
+            flex: 1;
+        }
+
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-left: 15px;
+        }
+
+        .tag {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag:hover {
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        .tag.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tag-delete {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tag-delete:hover {
+            background: #c53030;
+        }
+
+        .category-delete {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .category-delete:hover {
+            background: #c53030;
+        }
+
+        .prompt-output {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .prompt-editor {
+            background: #ffffff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 120px;
+            width: 100%;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .prompt-editor:focus {
+            outline: none;
+            border-color: #5a67d8;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .button-row .btn {
+            flex: 1;
+        }
+
+        .saved-prompts-section {
+            margin-top: 20px;
+        }
+
+        .saved-prompts-section h3 {
+            margin-bottom: 15px;
+            color: #4a5568;
+            font-size: 16px;
+        }
+
+        .saved-prompt-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .saved-prompt-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .prompt-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .prompt-item-name {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .prompt-item-date {
+            font-size: 11px;
+            color: #718096;
+        }
+
+        .prompt-item-text {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #2d3748;
+            background: #f7fafc;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+
+        .prompt-item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 11px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-small.btn-copy {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-small.btn-copy:hover {
+            background: #5a67d8;
+        }
+
+        .btn-small.btn-delete {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-small.btn-delete:hover {
+            background: #c53030;
+        }
+
+        .no-prompts {
+            text-align: center;
+            color: #718096;
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Stable Diffusion プロンプト管理</h1>
+            <p>タグを組み合わせて美しいプロンプトを生成しよう</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 左パネル: タグ管理 -->
+            <div class="panel">
+                <h2>🏷️ タグ管理</h2>
+                
+                <div class="stats">
+                    <span>登録タグ数: <span id="tag-count">0</span></span>
+                    <span>選択中: <span id="selected-count">0</span></span>
+                </div>
+
+                <!-- ジャンル追加 -->
+                <div class="form-section">
+                    <h3>ジャンル追加</h3>
+                    <div class="input-row">
+                        <input type="text" id="new-category-input" placeholder="ジャンル名を入力...">
+                        <button class="btn btn-primary" onclick="handleAddCategory()">追加</button>
+                    </div>
+                </div>
+
+                <!-- タグ追加 -->
+                <div class="form-section">
+                    <h3>タグ追加</h3>
+                    <div class="input-row">
+                        <select id="tag-category-select">
+                            <!-- ジャンルが動的に追加される -->
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <input type="text" id="tag-name-input" placeholder="タグ名（日本語）">
+                        <input type="text" id="tag-prompt-input" placeholder="プロンプト（英語、カンマ区切り）">
+                        <button class="btn btn-primary" onclick="handleAddTag()">追加</button>
+                    </div>
+                </div>
+
+                <!-- タグ一覧 -->
+                <div id="tags-container">
+                    <!-- タグがジャンル別に表示される -->
+                </div>
+
+                <div class="button-row">
+                    <button class="btn btn-secondary" onclick="clearSelection()">選択解除</button>
+                    <button class="btn btn-danger" onclick="clearAllTags()">全削除</button>
+                </div>
+            </div>
+
+            <!-- 右パネル: プロンプト生成 -->
+            <div class="panel">
+                <h2>✨ プロンプト生成</h2>
+                
+                <div class="button-row">
+                    <button class="btn btn-primary" onclick="copyPrompt()">📋 プロンプトをコピー</button>
+                    <button class="btn btn-secondary" onclick="toggleEditMode()">✏️ 編集</button>
+                </div>
+                
+                <div class="prompt-output" id="prompt-output">
+タグを選択してプロンプトを生成してください...
+                </div>
+
+                <textarea class="prompt-editor" id="prompt-editor" style="display: none;" placeholder="プロンプトを手動で入力・編集してください..."></textarea>
+
+                <div class="button-row">
+                    <button class="btn btn-secondary" onclick="saveCurrentPrompt()">💾 保存</button>
+                    <button class="btn btn-secondary" onclick="clearSavedPrompts()">🗑️ 履歴削除</button>
+                </div>
+
+                <!-- 保存済みプロンプト一覧 -->
+                <div class="saved-prompts-section">
+                    <h3>💾 保存済みプロンプト</h3>
+                    <div id="saved-prompts-list">
+                        <!-- 保存済みプロンプトがここに表示される -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // アプリケーションの状態
+        const AppState = {
+            categories: [],
+            tags: [],
+            selectedTags: [],
+            savedPrompts: [],
+            isEditMode: false
+        };
+
+        // ローカルストレージのキー
+        const STORAGE_KEYS = {
+            CATEGORIES: 'sd-categories',
+            TAGS: 'sd-tags',  
+            PROMPTS: 'sd-prompts'
+        };
+
+        // 初期化
+        function init() {
+            loadData();
+            setupEventListeners();
+            render();
+        }
+
+        // データの読み込み
+        function loadData() {
+            // カテゴリーの読み込み
+            const savedCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+            if (savedCategories) {
+                AppState.categories = JSON.parse(savedCategories);
+            } else {
+                // 初期カテゴリー
+                AppState.categories = [
+                    { id: 'character', name: 'キャラクター', color: '#f56565' },
+                    { id: 'style', name: 'スタイル', color: '#48bb78' },
+                    { id: 'quality', name: '品質', color: '#ed8936' },
+                    { id: 'composition', name: '構図', color: '#9f7aea' }
+                ];
+                saveData();
+            }
+
+            // タグの読み込み
+            const savedTags = localStorage.getItem(STORAGE_KEYS.TAGS);
+            if (savedTags) {
+                AppState.tags = JSON.parse(savedTags);
+            } else {
+                // 初期タグ
+                AppState.tags = [
+                    { name: '女の子', prompts: ['1girl'], category: 'character' },
+                    { name: '美しい', prompts: ['beautiful'], category: 'quality' },
+                    { name: '傑作', prompts: ['masterpiece', 'best quality'], category: 'quality' },
+                    { name: '詳細', prompts: ['detailed', 'highly detailed'], category: 'quality' },
+                    { name: 'アニメ風', prompts: ['anime style'], category: 'style' },
+                    { name: 'ポートレート', prompts: ['portrait'], category: 'composition' },
+                    { name: '長髪', prompts: ['long hair'], category: 'character' },
+                    { name: '青い瞳', prompts: ['blue eyes'], category: 'character' }
+                ];
+                saveData();
+            }
+
+            // 保存済みプロンプトの読み込み
+            const savedPrompts = localStorage.getItem(STORAGE_KEYS.PROMPTS);
+            if (savedPrompts) {
+                try {
+                    AppState.savedPrompts = JSON.parse(savedPrompts);
+                    // 古いデータ形式の修正（nameプロパティがない場合）
+                    AppState.savedPrompts = AppState.savedPrompts.map((prompt, index) => {
+                        if (!prompt.name) {
+                            return {
+                                name: `プロンプト ${index + 1}`,
+                                text: prompt.text || prompt,
+                                timestamp: prompt.timestamp || new Date().toLocaleString('ja-JP')
+                            };
+                        }
+                        return prompt;
+                    });
+                } catch (e) {
+                    AppState.savedPrompts = [];
+                }
+            } else {
+                AppState.savedPrompts = [];
+            }
+        }
+
+        // データの保存
+        function saveData() {
+            localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(AppState.categories));
+            localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(AppState.tags));
+            localStorage.setItem(STORAGE_KEYS.PROMPTS, JSON.stringify(AppState.savedPrompts));
+        }
+
+        // イベントリスナーの設定
+        function setupEventListeners() {
+            // Enterキーでの操作
+            document.getElementById('new-category-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleAddCategory();
+                }
+            });
+
+            document.getElementById('tag-name-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('tag-prompt-input').focus();
+                }
+            });
+
+            document.getElementById('tag-prompt-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleAddTag();
+                }
+            });
+        }
+
+        // 画面の描画
+        function render() {
+            renderCategorySelect();
+            renderTags();
+            renderStats();
+            renderSavedPrompts();
+            generatePrompt();
+            updateCategoryColors();
+        }
+
+        // カテゴリー選択プルダウンの描画
+        function renderCategorySelect() {
+            const select = document.getElementById('tag-category-select');
+            select.innerHTML = '';
+            
+            AppState.categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                select.appendChild(option);
+            });
+        }
+
+        // タグの描画
+        function renderTags() {
+            const container = document.getElementById('tags-container');
+            container.innerHTML = '';
+
+            AppState.categories.forEach(category => {
+                const categoryTags = AppState.tags.filter(tag => tag.category === category.id);
+                
+                if (categoryTags.length > 0) {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.className = 'category-section';
+                    
+                    // カテゴリーヘッダー
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'category-header';
+                    headerDiv.style.borderLeftColor = category.color;
+                    headerDiv.innerHTML = `
+                        <h3>${category.name} (${categoryTags.length})</h3>
+                        <button class="category-delete" onclick="handleDeleteCategory('${category.id}')">削除</button>
+                    `;
+                    
+                    // カテゴリータグ
+                    const tagsDiv = document.createElement('div');
+                    tagsDiv.className = 'category-tags';
+                    
+                    categoryTags.forEach(tag => {
+                        const tagDiv = document.createElement('div');
+                        tagDiv.className = 'tag';
+                        if (AppState.selectedTags.includes(tag.name)) {
+                            tagDiv.classList.add('selected');
+                        }
+                        
+                        tagDiv.style.borderColor = category.color;
+                        if (AppState.selectedTags.includes(tag.name)) {
+                            tagDiv.style.backgroundColor = category.color;
+                        }
+                        
+                        tagDiv.title = `プロンプト: ${tag.prompts.join(', ')}`;
+                        tagDiv.innerHTML = `
+                            ${tag.name}
+                            <button class="tag-delete" onclick="handleDeleteTag('${tag.name}')">×</button>
+                        `;
+                        
+                        tagDiv.addEventListener('click', function(e) {
+                            if (e.target.className !== 'tag-delete') {
+                                handleToggleTag(tag.name);
+                            }
+                        });
+                        
+                        tagsDiv.appendChild(tagDiv);
+                    });
+                    
+                    sectionDiv.appendChild(headerDiv);
+                    sectionDiv.appendChild(tagsDiv);
+                    container.appendChild(sectionDiv);
+                }
+            });
+        }
+
+        // 統計の描画
+        function renderStats() {
+            document.getElementById('tag-count').textContent = AppState.tags.length;
+            document.getElementById('selected-count').textContent = AppState.selectedTags.length;
+        }
+
+        // カテゴリー色の更新
+        function updateCategoryColors() {
+            let style = document.getElementById('category-colors-style');
+            if (!style) {
+                style = document.createElement('style');
+                style.id = 'category-colors-style';
+                document.head.appendChild(style);
+            }
+            
+            let css = '';
+            AppState.categories.forEach(category => {
+                css += `
+                    .tag.category-${category.id} { border-color: ${category.color} !important; }
+                    .tag.category-${category.id}.selected { background-color: ${category.color} !important; }
+                `;
+            });
+            style.textContent = css;
+        }
+
+        // カテゴリー追加
+        function handleAddCategory() {
+            const input = document.getElementById('new-category-input');
+            const name = input.value.trim();
+            
+            if (!name) {
+                alert('ジャンル名を入力してください');
+                return;
+            }
+            
+            if (AppState.categories.some(cat => cat.name === name)) {
+                alert('同じ名前のジャンルが既に存在します');
+                return;
+            }
+            
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const colors = ['#f56565', '#48bb78', '#ed8936', '#9f7aea', '#38b2ac', '#805ad5', '#d69e2e'];
+            const color = colors[AppState.categories.length % colors.length];
+            
+            AppState.categories.push({ id, name, color });
+            saveData();
+            input.value = '';
+            render();
+        }
+
+        // カテゴリー削除
+        function handleDeleteCategory(categoryId) {
+            const category = AppState.categories.find(cat => cat.id === categoryId);
+            if (!category) return;
+            
+            if (!confirm(`「${category.name}」ジャンルとそのタグをすべて削除しますか？`)) {
+                return;
+            }
+            
+            AppState.categories = AppState.categories.filter(cat => cat.id !== categoryId);
+            AppState.tags = AppState.tags.filter(tag => tag.category !== categoryId);
+            AppState.selectedTags = AppState.selectedTags.filter(tagName => {
+                return AppState.tags.some(tag => tag.name === tagName);
+            });
+            
+            saveData();
+            render();
+        }
+
+        // タグ追加
+        function handleAddTag() {
+            const nameInput = document.getElementById('tag-name-input');
+            const promptInput = document.getElementById('tag-prompt-input');
+            const categorySelect = document.getElementById('tag-category-select');
+            
+            const name = nameInput.value.trim();
+            const promptText = promptInput.value.trim();
+            const category = categorySelect.value;
+            
+            if (!name) {
+                alert('タグ名を入力してください');
+                nameInput.focus();
+                return;
+            }
+            
+            if (!promptText) {
+                alert('プロンプトを入力してください');
+                promptInput.focus();
+                return;
+            }
+            
+            if (AppState.tags.some(tag => tag.name === name)) {
+                alert('同じ名前のタグが既に存在します');
+                nameInput.focus();
+                return;
+            }
+            
+            const prompts = promptText.split(',').map(p => p.trim()).filter(p => p);
+            AppState.tags.push({ name, prompts, category });
+            
+            saveData();
+            nameInput.value = '';
+            promptInput.value = '';
+            nameInput.focus();
+            render();
+        }
+
+        // タグ削除
+        function handleDeleteTag(tagName) {
+            if (!confirm(`「${tagName}」を削除しますか？`)) {
+                return;
+            }
+            
+            AppState.tags = AppState.tags.filter(tag => tag.name !== tagName);
+            AppState.selectedTags = AppState.selectedTags.filter(name => name !== tagName);
+            
+            saveData();
+            render();
+        }
+
+        // タグ選択の切り替え
+        function handleToggleTag(tagName) {
+            const index = AppState.selectedTags.indexOf(tagName);
+            if (index === -1) {
+                AppState.selectedTags.push(tagName);
+            } else {
+                AppState.selectedTags.splice(index, 1);
+            }
+            render();
+        }
+
+        // プロンプト生成
+        function generatePrompt() {
+            // 編集モード中は自動更新しない
+            if (AppState.isEditMode) {
+                return;
+            }
+            
+            const output = document.getElementById('prompt-output');
+            
+            if (AppState.selectedTags.length === 0) {
+                output.textContent = 'タグを選択してプロンプトを生成してください...';
+                return;
+            }
+            
+            // カテゴリー別にプロンプトを整理
+            const promptsByCategory = {};
+            AppState.categories.forEach(cat => {
+                promptsByCategory[cat.id] = [];
+            });
+            
+            AppState.selectedTags.forEach(tagName => {
+                const tag = AppState.tags.find(t => t.name === tagName);
+                if (tag && tag.prompts) {
+                    if (!promptsByCategory[tag.category]) {
+                        promptsByCategory[tag.category] = [];
+                    }
+                    promptsByCategory[tag.category].push(...tag.prompts);
+                }
+            });
+            
+            // プロンプトを結合（品質を最初に）
+            let allPrompts = [];
+            
+            // 品質タグを最初に
+            if (promptsByCategory.quality) {
+                allPrompts.push(...promptsByCategory.quality);
+            }
+            
+            // その他のカテゴリー
+            AppState.categories.forEach(cat => {
+                if (cat.id !== 'quality' && promptsByCategory[cat.id]) {
+                    allPrompts.push(...promptsByCategory[cat.id]);
+                }
+            });
+            
+            output.textContent = allPrompts.join(', ');
+        }
+
+        // 選択解除
+        function clearSelection() {
+            AppState.selectedTags = [];
+            render();
+        }
+
+        // 全削除
+        function clearAllTags() {
+            if (!confirm('すべてのタグを削除しますか？')) {
+                return;
+            }
+            
+            AppState.tags = [];
+            AppState.selectedTags = [];
+            saveData();
+            render();
+        }
+
+        // 編集モード切り替え
+        function toggleEditMode() {
+            const output = document.getElementById('prompt-output');
+            const editor = document.getElementById('prompt-editor');
+            const btn = event.target;
+            
+            AppState.isEditMode = !AppState.isEditMode;
+            
+            if (AppState.isEditMode) {
+                // 編集モードON
+                const currentText = output.textContent;
+                if (currentText !== 'タグを選択してプロンプトを生成してください...') {
+                    editor.value = currentText;
+                } else {
+                    editor.value = '';
+                }
+                
+                output.style.display = 'none';
+                editor.style.display = 'block';
+                editor.focus();
+                btn.textContent = '💾 確定';
+                btn.className = 'btn btn-primary';
+            } else {
+                // 編集モードOFF
+                const editedText = editor.value.trim();
+                if (editedText) {
+                    output.textContent = editedText;
+                } else {
+                    generatePrompt(); // タグベースの生成に戻る
+                }
+                
+                output.style.display = 'block';
+                editor.style.display = 'none';
+                btn.textContent = '✏️ 編集';
+                btn.className = 'btn btn-secondary';
+            }
+        }
+
+        // プロンプトをコピー
+        function copyPrompt() {
+            let text = '';
+            
+            if (AppState.isEditMode) {
+                const editor = document.getElementById('prompt-editor');
+                text = editor.value.trim();
+            } else {
+                const output = document.getElementById('prompt-output');
+                text = output.textContent;
+            }
+            
+            if (!text || text === 'タグを選択してプロンプトを生成してください...') {
+                alert('コピーするプロンプトがありません');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ コピーしました！';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('コピーに失敗しました');
+            });
+        }
+
+        // 保存済みプロンプトの描画
+        function renderSavedPrompts() {
+            console.log('renderSavedPrompts呼び出し', AppState.savedPrompts);
+            const container = document.getElementById('saved-prompts-list');
+            
+            if (!container) {
+                console.error('saved-prompts-list要素が見つかりません');
+                return;
+            }
+            
+            container.innerHTML = '';
+
+            if (AppState.savedPrompts.length === 0) {
+                container.innerHTML = '<div class="no-prompts">保存されたプロンプトはありません</div>';
+                return;
+            }
+
+            AppState.savedPrompts.forEach((prompt, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'saved-prompt-item';
+                
+                // 安全な値の取得
+                const name = prompt.name || `プロンプト ${index + 1}`;
+                const text = prompt.text || '';
+                const timestamp = prompt.timestamp || '';
+                
+                itemDiv.innerHTML = `
+                    <div class="prompt-item-header">
+                        <div class="prompt-item-name">${escapeHtml(name)}</div>
+                        <div class="prompt-item-date">${escapeHtml(timestamp)}</div>
+                    </div>
+                    <div class="prompt-item-text">${escapeHtml(text)}</div>
+                    <div class="prompt-item-actions">
+                        <button class="btn-small btn-copy" onclick="copyPromptFromList(${index})">コピー</button>
+                        <button class="btn-small btn-delete" onclick="deleteSavedPrompt(${index})">削除</button>
+                    </div>
+                `;
+                
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // HTML エスケープ関数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // プロンプト保存
+        function saveCurrentPrompt() {
+            const output = document.getElementById('prompt-output');
+            const text = output.textContent;
+            
+            if (!text || text === 'タグを選択してプロンプトを生成してください...') {
+                alert('保存するプロンプトがありません');
+                return;
+            }
+            
+            const name = prompt('プロンプトの名前を入力してください:', '新しいプロンプト');
+            if (!name) {
+                return; // キャンセルされた場合
+            }
+            
+            const timestamp = new Date().toLocaleString('ja-JP');
+            AppState.savedPrompts.unshift({ name: name.trim(), text, timestamp });
+            
+            // 最大50件まで保存
+            if (AppState.savedPrompts.length > 50) {
+                AppState.savedPrompts = AppState.savedPrompts.slice(0, 50);
+            }
+            
+            saveData();
+            renderSavedPrompts();
+            alert('プロンプトを保存しました！');
+        }
+
+        // リストからプロンプトをコピー
+        function copyPromptFromList(index) {
+            const prompt = AppState.savedPrompts[index];
+            if (!prompt) return;
+            
+            navigator.clipboard.writeText(prompt.text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ 完了';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 1500);
+            }).catch(() => {
+                alert('コピーに失敗しました');
+            });
+        }
+
+        // 保存済みプロンプトを削除
+        function deleteSavedPrompt(index) {
+            const prompt = AppState.savedPrompts[index];
+            if (!prompt) return;
+            
+            if (!confirm(`「${prompt.name}」を削除しますか？`)) {
+                return;
+            }
+            
+            AppState.savedPrompts.splice(index, 1);
+            saveData();
+            renderSavedPrompts();
+        }
+
+        // 保存済みプロンプト全削除
+        function clearSavedPrompts() {
+            if (AppState.savedPrompts.length === 0) {
+                alert('削除するプロンプトがありません');
+                return;
+            }
+            
+            if (!confirm('保存済みプロンプトをすべて削除しますか？')) {
+                return;
+            }
+            
+            AppState.savedPrompts = [];
+            saveData();
+            renderSavedPrompts();
+            alert('すべてのプロンプトを削除しました');
+        }
+
+        // アプリケーション初期化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
